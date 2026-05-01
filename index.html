@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>호봉획정프로그램 V3.9 (2026.04.29)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+        :root {
+            --primary: #1e40af;
+            --border: #000000;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .sidebar {
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
+        }
+
+        .paper {
+            background: white;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 15mm 15mm;
+            margin: 0 auto;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            position: relative;
+            color: #000;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+            table-layout: fixed;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 6px 4px;
+            text-align: center;
+            line-height: 1.4;
+            word-break: break-all;
+        }
+
+        .info-table {
+            font-size: 12px;
+            border: 1px solid var(--border);
+        }
+        .info-table th {
+            background-color: #f8fafc;
+            font-weight: 700;
+            font-size: 13px;
+        }
+        .info-table .label {
+            background-color: #f1f5f9;
+            font-weight: 600;
+            width: 15%;
+        }
+        
+        .verifier-outer-top { border-top: 2px solid #000 !important; }
+        .verifier-outer-bottom { border-bottom: 2px solid #000 !important; }
+        .verifier-outer-left { border-left: 2px solid #000 !important; }
+        .verifier-outer-right { border-right: 2px solid #000 !important; }
+
+        .highlight-blue { color: #1e40af; font-weight: 800; font-size: 18px; }
+        .highlight-red { color: #dc2626; font-weight: 800; font-size: 16px; }
+
+        .career-table {
+            font-size: 10px; 
+        }
+        .career-table th { padding: 4px 2px; background-color: #f8fafc; }
+
+        input[type="text"], input[type="date"], input[type="number"], select {
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 13px;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        .select-compact {
+            font-size: 11.5px !important;
+            padding: 5px 8px !important;
+        }
+
+        .career-row-input {
+            border: none !important;
+            background: transparent !important;
+            padding: 0 !important;
+            text-align: center;
+            font-size: 9px;
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Action Buttons */
+        .action-btn-container {
+            display: grid;
+            grid-template-cols: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-fancy {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 10px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 12px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            border: 1px solid transparent;
+            gap: 4px;
+        }
+
+        .btn-fancy:active { transform: scale(0.96); }
+
+        .btn-fancy-save {
+            background: #ffffff;
+            border-color: #10b981;
+            color: #059669;
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1);
+        }
+        .btn-fancy-save:hover { background: #ecfdf5; }
+
+        .btn-fancy-load {
+            background: #ffffff;
+            border-color: #3b82f6;
+            color: #2563eb;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+        }
+        .btn-fancy-load:hover { background: #eff6ff; }
+
+        .btn-fancy-print {
+            grid-column: span 2;
+            background: #1e293b;
+            color: #ffffff;
+            padding: 16px;
+            font-size: 14px;
+        }
+        .btn-fancy-print:hover { background: #0f172a; }
+
+        @media print {
+            @page { 
+                size: A4; 
+                margin: 15mm 15mm; 
+            }
+            html, body {
+                height: auto !important;
+                min-height: 0 !important;
+                background: white !important;
+                /* 인쇄 시 스크롤바 제거 */
+                overflow: visible !important;
+            }
+            body { 
+                padding: 0 !important; 
+                margin: 0 !important;
+                display: block !important;
+            }
+            .no-print { display: none !important; }
+            /* 페이지 수 조절 및 스크롤바 제거를 위해 레이아웃 컨테이너 높이와 오버플로우 설정 해제 */
+            .flex, .flex-1, main {
+                display: block !important;
+                height: auto !important;
+                min-height: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: visible !important;
+            }
+            .paper { 
+                box-shadow: none !important; 
+                margin: 0 !important; 
+                width: 100% !important; 
+                padding: 0 !important; 
+                min-height: 0 !important; 
+                height: auto !important;
+                display: block !important;
+                overflow: visible !important;
+            }
+            /* 테이블 분할 방지 및 정렬 설정 */
+            table { page-break-inside: auto; border-collapse: collapse; }
+            tr { page-break-inside: avoid; page-break-after: auto; }
+            thead { display: table-header-group; }
+            /* 2쪽으로 넘어갈 경우 1쪽 하단에 합계가 반복 표시되지 않도록 설정을 일반 행 그룹으로 변경 */
+            tfoot { display: table-row-group; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside class="w-80 sidebar no-print p-5 h-screen overflow-y-auto sticky top-0">
+        <div class="flex items-start gap-2 mb-6">
+            <div class="bg-blue-700 p-2 rounded-lg mt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold text-slate-800 leading-tight">호봉획정프로그램 V3.9</h1>
+                <p class="text-[10px] font-medium text-slate-500">강릉시 유·초등 교(원)감단 협의회</p>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <section class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <h3 class="text-xs font-bold text-blue-800 uppercase mb-3">문서 기본 설정</h3>
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-500 mb-1 block">소속 교육청명</label>
+                        <input type="text" id="in-office-text" value="강원특별자치도교육청" oninput="update()">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-500 mb-1 block">문서 상단 수식어</label>
+                        <input type="text" id="in-header-text" value="기간제교원" oninput="update()">
+                    </div>
+                </div>
+            </section>
+
+            <section class="space-y-3">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-tight">대상자 정보</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <div><input type="text" id="in-dept" value="00초등학교" oninput="update()" placeholder="소속"></div>
+                    <div><input type="text" id="in-name" value="홍길동" oninput="update()" placeholder="성명"></div>
+                </div>
+                <input type="date" id="in-date" value="2026-04-26" onchange="update()">
+                <div>
+                    <label class="text-[11px] font-bold text-slate-500 mb-1 block">비고 (상단표)</label>
+                    <input type="text" id="in-note" value="해당 없음" oninput="update()">
+                </div>
+            </section>
+
+            <section class="space-y-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-tight">확인자 정보</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <div><input type="text" id="in-verifier-rank" value="교 감" oninput="update()"></div>
+                    <div><input type="text" id="in-verifier-name" value="000" oninput="update()"></div>
+                </div>
+            </section>
+
+            <section class="space-y-3">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-tight">획정 요소</h3>
+                <select id="in-cert" onchange="update()" class="select-compact">
+                    <option value="9" data-text="정교사(1급)">정교사(1급) [9호봉]</option>
+                    <option value="8" data-text="정교사(2급)" selected>정교사(2급) [8호봉]</option>
+                </select>
+                <select id="in-edu" onchange="update()" class="select-compact">
+                    <option value="2" data-text="대학교(6년제 졸업)">대학교 (6년제) [+2]</option>
+                    <option value="1" data-text="대학교(5년제 졸업)">대학교 (5년제) [+1]</option>
+                    <option value="0" data-text="대학교(4년제 졸업)" selected>대학교 (4년제) [0]</option>
+                    <option value="-1" data-text="전문대(3년제 졸업)">전문대 (3년제) [-1]</option>
+                    <option value="-2" data-text="전문대(2년제 졸업)">전문대 (2년제) [-2]</option>
+                </select>
+                <div class="space-y-1">
+                    <label class="text-[11px] font-bold text-slate-500 mb-1 block">가산 호봉 (사범/특수)</label>
+                    <select id="in-plus" onchange="update()" class="select-compact">
+                        <option value="0">해당 없음 [0]</option>
+                        <option value="1" selected>사범계 가산 [+1]</option>
+                        <option value="1">특수 가산 [+1]</option>
+                        <option value="2">특수 + 사범계 [+2]</option>
+                    </select>
+                </div>
+            </section>
+
+            <div class="action-btn-container">
+                <div onclick="saveData()" class="btn-fancy btn-fancy-save">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                    </svg>
+                    <span>자료 저장(.json)</span>
+                </div>
+                <div onclick="document.getElementById('fileInput').click()" class="btn-fancy btn-fancy-load">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                    </svg>
+                    <span>불러오기(.json)</span>
+                </div>
+                <input type="file" id="fileInput" class="hidden" accept=".json" onchange="loadData(event)">
+                <button onclick="window.print()" class="btn-fancy btn-fancy-print">
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                        <span>인쇄 및 PDF 저장</span>
+                    </div>
+                </button>
+            </div>
+            <p class="text-[10px] text-center text-slate-400 mt-2">최종수정: 2026. 04. 28.</p>
+        </div>
+    </aside>
+
+    <!-- Preview -->
+    <main class="flex-1 p-8 overflow-y-auto bg-slate-100">
+        <div class="paper">
+            <h2 id="out-main-title" class="text-center text-2xl font-bold mb-2 tracking-[0.2em] underline underline-offset-[10px] decoration-1"></h2>
+
+            <div class="text-center mb-6">
+                <span class="text-sm font-bold text-slate-700">( <span id="out-header-office"></span> )</span>
+            </div>
+
+            <div class="flex justify-end items-end mb-2 px-1">
+                <span class="text-[11px] font-medium">획정기준일: <span id="out-date" class="font-bold border-b-2 border-black px-1"></span></span>
+            </div>
+
+            <table class="info-table">
+                <colgroup>
+                    <col width="10%"><col width="15%"><col width="30%"><col width="15%"><col width="15%"><col width="15%">
+                </colgroup>
+                <tr>
+                    <th rowspan="5" class="bg-slate-100 border-r border-black">대<br>상<br>자</th>
+                    <td class="label">소 속</td>
+                    <td id="out-dept" class="text-left px-3 font-bold text-[14px]"></td>
+                    <td class="label">획정 호봉</td>
+                    <td colspan="2" id="out-final" class="highlight-blue bg-blue-50/50"></td>
+                </tr>
+                <tr>
+                    <td class="label">성 명</td>
+                    <td class="text-left px-3 font-bold text-[15px]">
+                        <span id="out-name"></span>
+                        <span class="float-right text-[10px] font-normal text-slate-400 mt-1">(서명)</span>
+                    </td>
+                    <td class="label">기산 호봉</td>
+                    <td colspan="2" id="out-cert-val" class="font-bold"></td>
+                </tr>
+                <tr>
+                    <td class="label">자 격</td>
+                    <td id="out-cert-text" class="text-left px-3"></td>
+                    <td class="label">학령가감</td>
+                    <td colspan="2" id="out-edu-val" class="font-bold"></td>
+                </tr>
+                <tr>
+                    <td class="label">학 령</td>
+                    <td id="out-edu-text" class="text-left px-3"></td>
+                    <td class="label">기타가산</td>
+                    <td colspan="2" id="out-plus-val" class="font-bold"></td>
+                </tr>
+                <tr>
+                    <td class="label">비 고</td>
+                    <td id="out-note" class="text-left px-3 text-[11px]"></td>
+                    <td class="label">경력 년수</td>
+                    <td colspan="2" id="out-career-sum" class="font-bold"></td>
+                </tr>
+                
+                <tr>
+                    <th rowspan="2" class="bg-slate-100 verifier-outer-left verifier-outer-top verifier-outer-bottom">확<br>인<br>자</th>
+                    <td class="label verifier-outer-top">직 위</td>
+                    <td id="out-verifier-rank" class="text-left px-3 font-bold text-[14px] verifier-outer-top verifier-outer-right"></td>
+                    <td class="label">잔여 월/일</td>
+                    <td colspan="2" id="out-rem" class="highlight-red bg-red-50/30"></td>
+                </tr>
+                <tr>
+                    <td class="label verifier-outer-bottom">성 명</td>
+                    <td class="text-left px-3 verifier-outer-bottom verifier-outer-right">
+                        <span id="out-verifier-name" class="font-bold text-[15px]"></span>
+                        <span class="float-right text-[10px] text-slate-400 mt-1">(인)</span>
+                    </td>
+                    <td class="label">차기 승급일</td>
+                    <td colspan="2" id="out-next-table" class="font-bold text-blue-700"></td>
+                </tr>
+            </table>
+
+            <div class="mt-8 mb-3 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-7 bg-slate-900 rounded-sm"></div>
+                    <span class="text-[18px] font-bold text-slate-900 tracking-tight">근무 경력 내역</span>
+                </div>
+                <button onclick="addCareer()" class="no-print text-[11px] bg-blue-50 text-blue-700 px-3 py-1.5 rounded-md border border-blue-200 font-bold hover:bg-blue-100">+ 경력 추가</button>
+            </div>
+
+            <table class="career-table">
+                <colgroup>
+                    <col width="14%"><col width="14%"><col width="22%">
+                    <col width="5%"><col width="5%"><col width="5%">
+                    <col width="6%"> 
+                    <col width="5%"><col width="5%"><col width="5%">
+                    <col width="9%">
+                    <col width="5%" class="no-print">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th rowspan="2">시작일</th><th rowspan="2">종료일</th><th rowspan="2">기관 및 내용</th>
+                        <th colspan="3">근무경력</th><th rowspan="2">환산<br>(%)</th>
+                        <th colspan="3">환산경력</th><th rowspan="2">비고</th><th rowspan="2" class="no-print">✕</th>
+                    </tr>
+                    <tr>
+                        <th>년</th><th>월</th><th>일</th><th>년</th><th>월</th><th>일</th>
+                    </tr>
+                </thead>
+                <tbody id="career-body"></tbody>
+                <tfoot class="bg-slate-50 font-bold">
+                    <tr>
+                        <td colspan="3" class="text-right px-4">근무경력/환산경력 합계</td>
+                        <td id="total-raw-y" class="text-slate-500 font-normal">0</td>
+                        <td id="total-raw-m" class="text-slate-500 font-normal">0</td>
+                        <td id="total-raw-d" class="text-slate-500 font-normal">0</td>
+                        <td></td>
+                        <td id="total-y">0</td><td id="total-m">0</td><td id="total-d">0</td>
+                        <td colspan="1"></td>
+                        <td class="no-print"></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <div class="mt-16 text-center">
+                <p class="text-lg font-medium mb-12">위와 같이 <span id="out-doc-type" class="font-bold underline decoration-2 underline-offset-8"></span> 호봉을 획정함</p>
+                <p id="footer-today" class="text-sm mb-12 text-slate-600"></p>
+                <p id="out-footer-text" class="text-2xl font-bold tracking-[0.5em] mt-4"></p>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    let careers = [
+        { s: '2024-03-01', e: '2025-02-28', n: 'OO초등학교 기간제교사', r: '100', note: '' },
+        { s: '2025-03-01', e: '2026-02-28', n: 'OO초등학교 기간제교사', r: '100', note: '' }
+    ];
+
+    function init() {
+        const today = new Date('2026-04-28');
+        document.getElementById('footer-today').innerText = today.getFullYear() + '년 ' + (today.getMonth() + 1) + '월 ' + today.getDate() + '일';
+        renderCareers();
+        update();
+    }
+
+    function addCareer() {
+        careers.push({ s:'', e:'', n:'', r:'100', note:'' });
+        renderCareers();
+        update();
+    }
+
+    function removeCareer(i) {
+        if(careers.length <= 1) return;
+        careers.splice(i, 1);
+        renderCareers();
+        update();
+    }
+
+    function getAutoFontSizeClass(text) {
+        if(!text) return 'text-[9px]';
+        const len = text.length;
+        if(len > 25) return 'text-[6px]';
+        if(len > 20) return 'text-[7px]';
+        if(len > 15) return 'text-[8px]';
+        return 'text-[9px]';
+    }
+
+    function edit(i, f, v) {
+        careers[i][f] = v;
+        if(f === 'n') {
+            const el = document.getElementById(`career-n-input-${i}`);
+            if(el) {
+                el.classList.remove('text-[9px]', 'text-[8px]', 'text-[7px]', 'text-[6px]');
+                el.classList.add(getAutoFontSizeClass(v));
+            }
+        }
+        update();
+    }
+
+    function renderCareers() {
+        const body = document.getElementById('career-body');
+        body.innerHTML = '';
+        careers.forEach((c, i) => {
+            const fontClass = getAutoFontSizeClass(c.n);
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="p-0"><input type="date" class="career-row-input" value="${c.s}" onchange="edit(${i},'s',this.value)"></td>
+                <td class="p-0"><input type="date" class="career-row-input" value="${c.e}" onchange="edit(${i},'e',this.value)"></td>
+                <td class="p-0"><input type="text" id="career-n-input-${i}" class="career-row-input text-left px-1 ${fontClass}" value="${c.n}" oninput="edit(${i},'n',this.value)" placeholder="기관 및 내용"></td>
+                <td id="raw-y-${i}">0</td><td id="raw-m-${i}">0</td><td id="raw-d-${i}">0</td>
+                <td class="p-0"><input type="text" class="career-row-input font-bold" value="${c.r}" oninput="edit(${i},'r',this.value)"></td>
+                <td id="row-y-${i}" class="font-bold">0</td><td id="row-m-${i}" class="font-bold">0</td><td id="row-d-${i}" class="font-bold">0</td>
+                <td class="p-0"><input type="text" class="career-row-input text-left px-1" value="${c.note || ''}" oninput="edit(${i},'note',this.value)"></td>
+                <td class="no-print p-0"><button onclick="removeCareer(${i})" class="text-red-400 hover:text-red-600">✕</button></td>
+            `;
+            body.appendChild(tr);
+        });
+    }
+
+    function isLastDayOfMonth(date) {
+        const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+        return d.getDate() === lastDay;
+    }
+
+    function calcV38(sStr, eStr) {
+        if(!sStr || !eStr) return {y:0, m:0, d:0};
+        
+        let start = new Date(sStr);
+        let end = new Date(eStr);
+        if(start > end) return {y:0, m:0, d:0};
+
+        const sY = start.getFullYear(), sM = start.getMonth(), sD = start.getDate();
+        const eY = end.getFullYear(), eM = end.getMonth(), eD = end.getDate();
+
+        let months = 0, days = 0;
+        const sLast = isLastDayOfMonth(start);
+        const eLast = isLastDayOfMonth(end);
+        const monthDiff = (eY * 12 + eM) - (sY * 12 + sM);
+
+        if (sD === 1 && eLast) {
+            months = monthDiff + 1;
+        } 
+        else if (sLast && eLast && monthDiff === 1) {
+            months = 1;
+            days = (eD === sD) ? 1 : 0;
+        } 
+        else {
+            months = monthDiff;
+            days = eD - sD + 1;
+            
+            if (days < 0) {
+                months--;
+                const prevMonthLastDay = new Date(eY, eM, 0).getDate();
+                days += prevMonthLastDay;
+            }
+            
+            const currentMonthTotalDays = new Date(eY, eM + 1, 0).getDate();
+            
+            if (currentMonthTotalDays === 31 && !(sLast && eLast)) {
+                if (days === 30) days = 29;
+            }
+            
+            if (days >= currentMonthTotalDays) {
+                months += 1;
+                days = 0;
+            }
+        }
+
+        let finalY = Math.floor(months / 12);
+        let finalM = months % 12;
+        let finalD = days;
+
+        if (finalD >= 30) {
+            finalM += Math.floor(finalD / 30);
+            finalD %= 30;
+        }
+        if (finalM >= 12) {
+            finalY += Math.floor(finalM / 12);
+            finalM %= 12;
+        }
+
+        return { y: finalY, m: finalM, d: finalD };
+    }
+
+    function update() {
+        const deptValue = document.getElementById('in-dept').value;
+        const officeName = document.getElementById('in-office-text').value;
+        document.getElementById('out-header-office').innerText = officeName;
+        document.getElementById('out-dept').innerText = deptValue;
+        document.getElementById('out-footer-text').innerText = deptValue;
+        
+        const docName = document.getElementById('in-header-text').value;
+        document.getElementById('out-main-title').innerText = docName + " 호봉획정표";
+        document.getElementById('out-doc-type').innerText = docName;
+        document.getElementById('out-name').innerText = document.getElementById('in-name').value;
+        
+        document.getElementById('out-note').innerText = document.getElementById('in-note').value;
+        document.getElementById('out-verifier-rank').innerText = document.getElementById('in-verifier-rank').value;
+        document.getElementById('out-verifier-name').innerText = document.getElementById('in-verifier-name').value;
+
+        const bDate = document.getElementById('in-date').value;
+        document.getElementById('out-date').innerText = bDate;
+        
+        const certS = document.getElementById('in-cert');
+        const cStep = parseInt(certS.value);
+        document.getElementById('out-cert-text').innerText = certS.options[certS.selectedIndex].getAttribute('data-text');
+        document.getElementById('out-cert-val').innerText = cStep + " 호봉";
+        
+        const eduS = document.getElementById('in-edu');
+        const eAdj = parseInt(eduS.value);
+        document.getElementById('out-edu-text').innerText = eduS.options[eduS.selectedIndex].getAttribute('data-text');
+        document.getElementById('out-edu-val').innerText = (eAdj >= 0 ? "+" : "") + eAdj;
+        
+        const plus = parseInt(document.getElementById('in-plus').value) || 0;
+        document.getElementById('out-plus-val').innerText = "+" + plus;
+
+        let totalY = 0, totalM = 0, totalD = 0;
+        let totalRawY = 0, totalRawM = 0, totalRawD = 0;
+
+        careers.forEach((c, i) => {
+            const raw = calcV38(c.s, c.e);
+            document.getElementById(`raw-y-${i}`).innerText = raw.y;
+            document.getElementById(`raw-m-${i}`).innerText = raw.m;
+            document.getElementById(`raw-d-${i}`).innerText = raw.d;
+
+            totalRawY += raw.y; totalRawM += raw.m; totalRawD += raw.d;
+
+            const rate = (parseFloat(c.r) || 0) / 100;
+            let rawTotalDays = (raw.y * 360) + (raw.m * 30) + raw.d;
+            let convTotalDays = Math.floor(rawTotalDays * rate);
+            
+            let y = Math.floor(convTotalDays / 360);
+            let m = Math.floor((convTotalDays % 360) / 30);
+            let d = convTotalDays % 30;
+
+            document.getElementById(`row-y-${i}`).innerText = y;
+            document.getElementById(`row-m-${i}`).innerText = m;
+            document.getElementById(`row-d-${i}`).innerText = d;
+            
+            totalY += y; totalM += m; totalD += d;
+        });
+
+        // 근무경력 합계 계산
+        totalRawM += Math.floor(totalRawD / 30); totalRawD = totalRawD % 30;
+        totalRawY += Math.floor(totalRawM / 12); totalRawM = totalRawM % 12;
+
+        document.getElementById('total-raw-y').innerText = totalRawY;
+        document.getElementById('total-raw-m').innerText = totalRawM;
+        document.getElementById('total-raw-d').innerText = totalRawD;
+
+        // 환산경력 합계 계산
+        totalM += Math.floor(totalD / 30); totalD = totalD % 30;
+        totalY += Math.floor(totalM / 12); totalM = totalM % 12;
+
+        document.getElementById('total-y').innerText = totalY;
+        document.getElementById('total-m').innerText = totalM;
+        document.getElementById('total-d').innerText = totalD;
+        
+        document.getElementById('out-career-sum').innerText = totalY + "년 " + totalM + "월 " + totalD + "일";
+        document.getElementById('out-rem').innerText = totalM + "월 " + totalD + "일";
+
+        const finalStep = cStep + eAdj + plus + totalY;
+        document.getElementById('out-final').innerText = (finalStep > 40 ? 40 : finalStep) + " 호봉";
+
+        if(bDate) {
+            let next = new Date(bDate);
+            next.setMonth(next.getMonth() + (12 - totalM));
+            next.setDate(1); 
+            document.getElementById('out-next-table').innerText = next.getFullYear() + "년 " + String(next.getMonth() + 1).padStart(2,'0') + "월 01일";
+        }
+    }
+
+    function saveData() {
+        const data = { 
+            name: document.getElementById('in-name').value, 
+            careers: careers,
+            meta: {
+                office: document.getElementById('in-office-text').value,
+                header: document.getElementById('in-header-text').value,
+                dept: document.getElementById('in-dept').value,
+                date: document.getElementById('in-date').value,
+                note: document.getElementById('in-note').value,
+                vRank: document.getElementById('in-verifier-rank').value,
+                vName: document.getElementById('in-verifier-name').value,
+                plusChoice: document.getElementById('in-plus').value
+            }
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `호봉획정_${data.name}_20260429.json`;
+        a.click();
+    }
+
+    function loadData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const data = JSON.parse(e.target.result);
+            if(data.careers) careers = data.careers;
+            if(data.meta) {
+                document.getElementById('in-office-text').value = data.meta.office || "";
+                document.getElementById('in-header-text').value = data.meta.header || "";
+                document.getElementById('in-dept').value = data.meta.dept || "";
+                document.getElementById('in-date').value = data.meta.date || "";
+                document.getElementById('in-note').value = data.meta.note || "";
+                document.getElementById('in-verifier-rank').value = data.meta.vRank || "";
+                document.getElementById('in-verifier-name').value = data.meta.vName || "";
+                if(data.meta.plusChoice) document.getElementById('in-plus').value = data.meta.plusChoice;
+            }
+            renderCareers(); update();
+        };
+        reader.readAsText(file);
+    }
+
+    window.onload = init;
+</script>
+</body>
+</html>
